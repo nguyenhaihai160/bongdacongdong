@@ -17,7 +17,7 @@ h2{
 text-align:center;
 }
 
-input,button{
+input,select,button{
 padding:10px;
 margin:5px 0;
 width:100%;
@@ -59,6 +59,16 @@ border:none;
 <h3>➕ Thêm học viên</h3>
 
 <input id="tenhv" placeholder="Tên học viên">
+<input id="sdt" placeholder="SĐT phụ huynh">
+<input id="namsinh" type="number" placeholder="Năm sinh">
+
+<select id="khoa">
+<option value="">Chọn khóa</option>
+<option>U7-9</option>
+<option>U10-12</option>
+<option>U12-14</option>
+<option>Trên 15</option>
+</select>
 
 <button onclick="themHV()">Thêm học viên</button>
 
@@ -95,19 +105,22 @@ localStorage.setItem("hocvien",JSON.stringify(hocvien))
 
 function themHV(){
 
-let ten = document.getElementById("tenhv").value
+let ten = tenhv.value
+let phone = sdt.value
+let ns = parseInt(namsinh.value)
+let kh = khoa.value
 
-if(!ten){
-alert("Nhập tên học viên")
+if(!ten || !kh){
+alert("Nhập tên và chọn khóa")
 return
 }
 
-let hv = {
+let hv={
 
 ten:ten,
-sdt:"",
-namsinh:2015,
-khoa:"",
+sdt:phone,
+namsinh:ns,
+khoa:kh,
 tong:0,
 hoc:0,
 hocphi:0,
@@ -120,7 +133,9 @@ hocvien.push(hv)
 
 luu()
 
-document.getElementById("tenhv").value=""
+tenhv.value=""
+sdt.value=""
+namsinh.value=""
 
 alert("Đã thêm học viên")
 
@@ -145,13 +160,13 @@ html+=`
 
 })
 
-document.getElementById("danhsach").innerHTML=html
+danhsach.innerHTML=html
 
 }
 
 function diemDanh(){
 
-let ngay = document.getElementById("ngayhoc").value
+let ngay = ngayhoc.value
 
 if(!ngay){
 alert("Chọn ngày học")
