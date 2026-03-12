@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+
+<meta charset="UTF-8">
+<title>Quản Lý Học Viện Bóng Đá</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f4f4;
+margin:20px;
+}
+
+h1{
+text-align:center;
+}
+
+input,select,button{
+padding:6px;
+margin:4px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+margin-bottom:20px;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+
+th{
+background:#222;
+color:white;
+}
+
+.dashboard{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
+min-width:150px;
+text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>⚽ QUẢN LÝ HỌC VIỆN BÓNG ĐÁ</h1>
+
+<div class="dashboard">
+
+<div class="card">👨‍🎓 Học viên<br><b id="tonghv">0</b></div>
+<div class="card">💰 Tổng học phí<br><b id="tongtien">0</b></div>
+<div class="card">💵 Đã thu<br><b id="dathu">0</b></div>
+<div class="card">⚠️ Còn nợ<br><b id="conno">0</b></div>
+
+</div>
+
+<h2>📚 Tạo khóa học</h2>
+
+<input id="tenkhoa" placeholder="Tên khóa">
+<input id="buoikhoa" type="number" placeholder="Số buổi">
+<input id="phikhoa" type="number" placeholder="Học phí">
+
+<button onclick="taoKhoa()">Tạo khóa</button>
+
+<table>
+
+<tr>
+<th>Tên khóa</th>
+<th>Số buổi</th>
+<th>Học phí</th>
+</tr>
+
+<tbody id="bangkhoa"></tbody>
+
+</table>
+
+<h2>➕ Thêm học viên</h2>
+
+<input id="ten" placeholder="Tên">
+<input id="sdt" placeholder="SĐT">
+<input id="namsinh" placeholder="Năm sinh">
+
+<select id="khoa" onchange="chonKhoa()"></select>
+
+<input id="sobuoi" placeholder="Buổi">
+<input id="hocphi" placeholder="Học phí">
+
+<button onclick="themHocVien()">Thêm</button>
+
+<br><br>
+
+<input id="search" placeholder="🔎 tìm học viên..." onkeyup="hienthi()">
+
+<h2>👨‍🎓 Danh sách học viên</h2>
+
+<table>
+
+<tr>
+<th>Tên</th>
+<th>Tuổi</th>
+<th>Lớp</th>
+<th>SĐT</th>
+<th>Khóa</th>
+<th>Buổi</th>
+<th>Trạng thái</th>
+<th>Học phí</th>
+<th>Nợ</th>
+<th>Đóng</th>
+<th>Xóa</th>
+</tr>
+
+<tbody id="danhsach"></tbody>
+
+</table>
+
+<h2>📜 Lịch sử học viên</h2>
+
+<table>
+
+<tr>
+<th>Học viên</th>
+<th>Số buổi</th>
+<th>Ngày đã học</th>
+<th>Chuyên cần</th>
+</tr>
+
+<tbody id="lichsuhoc"></tbody>
+
+</table>
+
+<h2>⚽ Lịch tập</h2>
+
+<table>
+
+<tr><th>Lớp</th><th>Lịch tập</th></tr>
+
+<tr>
+<td>U7-9</td>
+<td><input id="lich1"></td>
+</tr>
+
+<tr>
+<td>U10-12</td>
+<td><input id="lich2"></td>
+</tr>
+
+<tr>
+<td>U12-14</td>
+<td><input id="lich3"></td>
+</tr>
+
+<tr>
+<td>Trên 15</td>
+<td><input id="lich4"></td>
+</tr>
+
+</table>
+
+<button onclick="luuLich()">Lưu lịch</button>
+
+<h2>📅 Điểm danh</h2>
+
+<input type="date" id="ngayhoc">
+
+<button onclick="taoBuoi()">Tạo danh sách</button>
+
+<table>
+
+<tr>
+<th>Học viên</th>
+<th>Tham gia</th>
+</tr>
+
+<tbody id="diemdanh"></tbody>
+
+</table>
+
+<button onclick="diemDanh()">Điểm danh</button>
+
+<h2>📈 Biểu đồ doanh thu</h2>
+
+<canvas id="chart"></canvas>
+
+<script>
+
+let hocvien=JSON.parse(localStorage.getItem("hocvien"))||[]
+let khoahoc=JSON.parse(localStorage.getItem("khoahoc"))||[]
+
+let lichtap=JSON.parse(localStorage.getItem("lichtap"))||{
+u79:"Thứ 2 - Thứ 5",
+u1012:"Thứ 3 - Thứ 6",
+u1214:"Thứ 4 - CN",
+tren15:"Thứ 7"
+}
+
+function luu(){
+
+localStorage.setItem("hocvien",JSON.stringify(hocvien))
+
+}
+
+function tuoi(n){
+
+return new Date().getFullYear()-n
+
+}
+
+function nhom(t){
+
+if(t<=9)return"U7-9"
+if(t<=12)return"U10-12"
+if(t<=14)return"U12-14"
+return"Trên 15"
+
+}
+
+function taoKhoa(){
+
+let k={
+ten:tenkhoa.value,
+buoi:parseInt(buoikhoa.value),
+phi:parseInt(phikhoa.value)
+}
+
+khoahoc.push(k)
+
+localStorage.setItem("khoahoc",JSON.stringify(khoahoc))
+
+loadKhoa()
+hienthiKhoa()
+
+}
+
+function loadKhoa(){
+
+let html='<option>Chọn khóa</option>'
+
+khoahoc.forEach((k,i)=>{
+
+html+=`<option value="${i}">${k.ten}</option>`
+
+})
+
+khoa.innerHTML=html
+
+}
+
+function hienthiKhoa(){
+
+let html=""
+
+khoahoc.forEach(k=>{
+
+html+=`
+<tr>
+<td>${k.ten}</td>
+<td>${k.buoi}</td>
+<td>${k.phi}</td>
+</tr>
+`
+
+})
+
+bangkhoa.innerHTML=html
+
+}
+
+function chonKhoa(){
+
+let i=khoa.value
+
+sobuoi.value=khoahoc[i].buoi
+hocphi.value=khoahoc[i].phi
+
+}
+
+function themHocVien(){
+
+let i=khoa.value
+
+let hv={
+ten:ten.value,
+sdt:sdt.value,
+namsinh:parseInt(namsinh.value),
+khoa:khoahoc[i].ten,
+tong:khoahoc[i].buoi,
+hoc:0,
+hocphi:khoahoc[i].phi,
+dong:0,
+lichhoc:[]
+}
+
+hocvien.push(hv)
+
+luu()
+
+hienthi()
+
+}
+
+function dongTien(i){
+
+let t=prompt("Nhập tiền")
+
+hocvien[i].dong+=parseInt(t)
+
+luu()
+
+hienthi()
+
+}
+
+function xoaHV(i){
+
+if(confirm("Xóa học viên?")){
+
+hocvien.splice(i,1)
+
+luu()
+
+hienthi()
+
+}
+
+}
+
+function hienthi(){
+
+let html=""
+
+let tong=0
+let dong=0
+
+hocvien.forEach((hv,i)=>{
+
+let t=tuoi(hv.namsinh)
+let lop=nhom(t)
+
+let trangthai="🟢"
+
+if(hv.hoc>=hv.tong)
+trangthai="🔴"
+else if(hv.hoc>=hv.tong-2)
+trangthai="🟡"
+
+let no=hv.hocphi-hv.dong
+
+html+=`
+
+<tr>
+
+<td>${hv.ten}</td>
+<td>${t}</td>
+<td>${lop}</td>
+<td>${hv.sdt}</td>
+<td>${hv.khoa}</td>
+<td>${hv.hoc}/${hv.tong}</td>
+<td>${trangthai}</td>
+<td>${hv.hocphi}</td>
+<td>${no}</td>
+<td><button onclick="dongTien(${i})">💰</button></td>
+<td><button onclick="xoaHV(${i})">❌</button></td>
+
+</tr>
+
+`
+
+tong+=hv.hocphi
+dong+=hv.dong
+
+})
+
+danhsach.innerHTML=html
+
+tonghv.innerText=hocvien.length
+tongtien.innerText=tong
+dathu.innerText=dong
+conno.innerText=tong-dong
+
+hienThiLichHoc()
+
+veChart(tong,dong)
+
+}
+
+function hienThiLichHoc(){
+
+let html=""
+
+hocvien.forEach(hv=>{
+
+let tyle=Math.round((hv.hoc/hv.tong)*100)
+
+html+=`
+
+<tr>
+<td>${hv.ten}</td>
+<td>${hv.hoc}/${hv.tong}</td>
+<td>${hv.lichhoc.join(", ")}</td>
+<td>${tyle}%</td>
+</tr>
+
+`
+
+})
+
+lichsuhoc.innerHTML=html
+
+}
+
+function taoBuoi(){
+
+let html=""
+
+hocvien.forEach((hv,i)=>{
+
+html+=`
+
+<tr>
+<td>${hv.ten}</td>
+<td><input type="checkbox" id="hv${i}"></td>
+</tr>
+
+`
+
+})
+
+diemdanh.innerHTML=html
+
+}
+
+function diemDanh(){
+
+let ngay=ngayhoc.value
+
+hocvien.forEach((hv,i)=>{
+
+let c=document.getElementById("hv"+i)
+
+if(c && c.checked){
+
+hv.hoc++
+
+if(!hv.lichhoc.includes(ngay)){
+hv.lichhoc.push(ngay)
+}
+
+}
+
+})
+
+luu()
+
+hienthi()
+
+}
+
+function luuLich(){
+
+lichtap.u79=lich1.value
+lichtap.u1012=lich2.value
+lichtap.u1214=lich3.value
+lichtap.tren15=lich4.value
+
+localStorage.setItem("lichtap",JSON.stringify(lichtap))
+
+}
+
+function veChart(tong,dong){
+
+let no=tong-dong
+
+new Chart(chart,{
+type:'bar',
+data:{
+labels:['Tổng','Đã thu','Còn nợ'],
+datasets:[{data:[tong,dong,no]}]
+}
+})
+
+}
+
+loadKhoa()
+hienthiKhoa()
+hienthi()
+
+</script>
+
+</body>
+</html>
