@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+
+<meta charset="UTF-8">
+<title>Điểm Danh Học Viên</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f4f4;
+padding:15px;
+}
+
+h2{
+text-align:center;
+}
+
+input,button{
+padding:10px;
+margin:5px 0;
+width:100%;
+font-size:16px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:center;
+}
+
+th{
+background:#222;
+color:white;
+}
+
+button{
+background:#27ae60;
+color:white;
+border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>⚽ Điểm Danh Buổi Tập</h2>
+
+<input type="date" id="ngayhoc">
+
+<button onclick="taoDanhSach()">Tạo danh sách</button>
+
+<table>
+
+<tr>
+<th>Học viên</th>
+<th>Có mặt</th>
+</tr>
+
+<tbody id="danhsach"></tbody>
+
+</table>
+
+<br>
+
+<button onclick="diemDanh()">💾 Lưu điểm danh</button>
+
+<script>
+
+let hocvien = JSON.parse(localStorage.getItem("hocvien")) || []
+
+function taoDanhSach(){
+
+let html=""
+
+hocvien.forEach((hv,i)=>{
+
+html+=`
+
+<tr>
+<td>${hv.ten}</td>
+<td><input type="checkbox" id="hv${i}"></td>
+</tr>
+
+`
+
+})
+
+danhsach.innerHTML=html
+
+}
+
+function diemDanh(){
+
+let ngay = document.getElementById("ngayhoc").value
+
+if(!ngay){
+alert("Chọn ngày học")
+return
+}
+
+hocvien.forEach((hv,i)=>{
+
+let c=document.getElementById("hv"+i)
+
+if(c && c.checked){
+
+hv.hoc++
+
+if(!hv.lichhoc.includes(ngay)){
+hv.lichhoc.push(ngay)
+}
+
+}
+
+})
+
+localStorage.setItem("hocvien",JSON.stringify(hocvien))
+
+alert("Đã lưu điểm danh")
+
+}
+
+taoDanhSach()
+
+</script>
+
+</body>
+</html>
