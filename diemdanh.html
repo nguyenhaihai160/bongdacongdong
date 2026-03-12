@@ -28,6 +28,7 @@ table{
 width:100%;
 border-collapse:collapse;
 background:white;
+margin-top:10px;
 }
 
 th,td{
@@ -55,9 +56,17 @@ border:none;
 
 <h2>⚽ Điểm Danh Buổi Tập</h2>
 
+<h3>➕ Thêm học viên</h3>
+
+<input id="tenhv" placeholder="Tên học viên">
+
+<button onclick="themHV()">Thêm học viên</button>
+
+<h3>📅 Ngày tập</h3>
+
 <input type="date" id="ngayhoc">
 
-<button onclick="taoDanhSach()">Tạo danh sách</button>
+<button onclick="taoDanhSach()">Tạo danh sách điểm danh</button>
 
 <table>
 
@@ -78,6 +87,47 @@ border:none;
 
 let hocvien = JSON.parse(localStorage.getItem("hocvien")) || []
 
+function luu(){
+
+localStorage.setItem("hocvien",JSON.stringify(hocvien))
+
+}
+
+function themHV(){
+
+let ten = document.getElementById("tenhv").value
+
+if(!ten){
+alert("Nhập tên học viên")
+return
+}
+
+let hv = {
+
+ten:ten,
+sdt:"",
+namsinh:2015,
+khoa:"",
+tong:0,
+hoc:0,
+hocphi:0,
+dong:0,
+lichhoc:[]
+
+}
+
+hocvien.push(hv)
+
+luu()
+
+document.getElementById("tenhv").value=""
+
+alert("Đã thêm học viên")
+
+taoDanhSach()
+
+}
+
 function taoDanhSach(){
 
 let html=""
@@ -95,7 +145,7 @@ html+=`
 
 })
 
-danhsach.innerHTML=html
+document.getElementById("danhsach").innerHTML=html
 
 }
 
@@ -124,7 +174,7 @@ hv.lichhoc.push(ngay)
 
 })
 
-localStorage.setItem("hocvien",JSON.stringify(hocvien))
+luu()
 
 alert("Đã lưu điểm danh")
 
